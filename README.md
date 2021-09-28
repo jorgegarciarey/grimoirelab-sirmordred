@@ -16,22 +16,22 @@ SirMordred is the tool used to coordinate the execution of the GrimoireLab platf
 ## Setup.cfg [&uarr;](#contents)
 
 The setup file holds the configuration to arrange all process underlying GrimoireLab. It is composed of sections which allow to define the general settings such as which phases
-to activate (e.g., collection, enrichment) and where to store the logs, as well as the location and credentials for SortingHat and the ElasticSearch instances where the raw and enriched data 
+to activate (e.g., collection, enrichment) and where to store the logs, as well as the location and credentials for SortingHat and the ElasticSearch instances where the raw and enriched data
 is stored. Furthermore, it also includes backend sections to set up the parameters used by Perceval to access the software development tools (e.g., GitHub tokens, gerrit username) and fetch their data.
 
 Dashboards can be automatically uploaded via the `setup.cfg` if the phase `panels` is enabled. The `Data Status` and `Overview` dashboards will contain
 widgets that summarize the information of the data sources declared in the `setup.cfg`. Note that the widgets are not updated when adding
 new data sources, thus you need to manually delete the dashboards `Data Status` and `Overview`, and restart mordred again (making sure that the option `panels` is enabled).
 
-### [es_collection] 
+### [es_collection]
 
  * **url** (str: http://172.17.0.1:9200): Elasticsearch URL (**Required**)
-### [es_enrichment] 
+### [es_enrichment]
 
  * **autorefresh** (bool: True): Execute the autorefresh of identities
  * **autorefresh_interval** (int: 2): Time interval (days) to autorefresh identities
  * **url** (str: http://172.17.0.1:9200): Elasticsearch URL (**Required**)
-### [general] 
+### [general]
 
  * **bulk_size** (int: 1000): Number of items to write in Elasticsearch using bulk operations
  * **debug** (bool: True): Debug mode (logging mainly) (**Required**)
@@ -44,7 +44,7 @@ new data sources, thus you need to manually delete the dashboards `Data Status` 
  * **menu_file** (str: ./menu.yaml): YAML file to define the menus to be shown in Kibiter
  * **global_data_sources** (list: bugzilla, bugzillarest, confluence, discourse, gerrit, jenkins, jira): List of data sources collected globally, they are declared in the section 'unknown' of the projects.json
  * **retention_time** (int: None): the maximum number of minutes wrt the current date to retain the data
-### [panels] 
+### [panels]
 
  * **community** (bool: True): Include community section in dashboard
  * **kibiter_default_index** (str: git): Default index pattern for Kibiter
@@ -69,11 +69,11 @@ new data sources, thus you need to manually delete the dashboards `Data Status` 
  * **identities** (bool: True): Do the identities tasks (**Required**)
  * **panels** (bool: True): Load panels, create alias and other tasks related (**Required**)
 
-### [projects] 
+### [projects]
 
  * **projects_file** (str: projects.json): Projects file path with repositories to be collected grouped by projects
  * **projects_url** (str: None): Projects file URL, the projects_file is required to store the file locally
-### [sortinghat] 
+### [sortinghat]
 
  * **affiliate** (bool: True): Affiliate identities to organizations (**Required**)
  * **autogender** (bool: False): Add gender to the profiles (executes autogender)
@@ -84,7 +84,7 @@ new data sources, thus you need to manually delete the dashboards `Data Status` 
  * **identities_export_url** (str: None): URL in which to export the identities in Sortinghat
  * **identities_file** (list: []): File path with the identities to be loaded in Sortinghat
  * **identities_format** (str: sortinghat): Format of the identities data to be loaded
- * **load_orgs** (bool: False): 
+ * **load_orgs** (bool: False):
  * **matching** (list: ['email']): Algorithm for matching identities in Sortinghat (**Required**)
  * **orgs_file** (str: None): File path with the organizations to be loaded in Sortinghat
  * **password** (str: ): Password to access the Sortinghat database (**Required**)
@@ -104,7 +104,7 @@ new data sources, thus you need to manually delete the dashboards `Data Status` 
 * **backend-param-2**: ..
 * **backend-param-n**: ..
 
-The template of a backend section is shown above. 
+The template of a backend section is shown above.
 Further information about Perceval backends parameters are available at:
 
 * Params details: http://perceval.readthedocs.io/en/latest/perceval.backends.core.html
@@ -116,7 +116,7 @@ Note that some backend sections allow to specify specific enrichment options, wh
 * **node_regex**: regular expression for extracting node name from `builtOn` field. This
   regular expression **must contain at least one group**. First group will be used to extract
   node name. More groups are allowed but not used to extract anything else.
-  
+
 ### [studies-name:tag] (tag is optional)
 
 * **study-param-1**: ..
@@ -141,13 +141,15 @@ company, sub-projects within a large project such as Linux and Eclipse, or the o
 2. Second level: data sources and metadata
 3. Third level: data source URLs
 
-There are some filters, labels, and a special section:
+There are some filters, labels, and a special section and authentication:
 * Filter `--filter-no-collection=true`: This filter is used to show old enriched data within the dashboards from
 repositories that don't exist anymore in upstream.
 * Filter `--filter-raw` and the section `unknown`: The data sources will only collected at the section `unknown`
 but this allow to add the same source in different sections to enrich using the filter `--filter-raw`.
 * Label ` --labels=[example]`: The data source will have the label of `example` which can be used to create visualisations for specific sets of data
 * Section `unknown`: If the data source is only under this section it will be enriched as project `main`.
+* Authentication against **Git private repositories**: To access to a private repository will be necessary to set the `username` and `password/api-token`.
+
 ```
 {
     "Chaoss": {
@@ -156,7 +158,8 @@ but this allow to add the same source in different sections to enrich using the 
         ]
         "git": [
             "https:/github.com/chaoss/grimoirelab-perceval",
-            "https:/github.com/chaoss/grimoirelab-sirmordred"
+            "https:/github.com/chaoss/grimoirelab-sirmordred",
+            "https://username:password@github.com/chaoss/grimoirelab.git"
         ],
         "github": [
             "https:/github.com/chaoss/grimoirelab-perceval --filter-no-collection=true",
@@ -191,6 +194,7 @@ repo is listed in the `unknown` section. However only the project `GrimoireLab` 
 raw index but it will enriched in the enriched index.
 * In the section `GrimoireLab` the metadata will showed in the enriched index as extra fields.
 * In the section `unknown` the data source `confluence` will be enriched as the project `main`.
+* The Git repository `grimoirelab` will authenticate with `username:password`.
 
 ## Supported data sources [&uarr;](#contents)
 
@@ -405,7 +409,7 @@ exec-path = <jadolint-local-path>/jadolint.jar
 in-paths = [Dockerfile, Dockerfile-full, Dockerfile-secured, Dockerfile-factory, Dockerfile-installed]
 ```
 #### dockersmells [&uarr;](#supported-data-sources-)
-Smells extracted from Docker files. Requires https://github.com/crossminer/crossJadolint 
+Smells extracted from Docker files. Requires https://github.com/crossminer/crossJadolint
 - projects.json
 ```
 {
@@ -545,9 +549,9 @@ api-token = xxxx
 category = issue
 sleep-for-rate = true
 no-archive = true (suggested)
-studies = [enrich_onion:github, 
-           enrich_geolocation:user, 
-           enrich_geolocation:assignee, 
+studies = [enrich_onion:github,
+           enrich_geolocation:user,
+           enrich_geolocation:assignee,
            enrich_extra_data:github,
            enrich_backlog_analysis,
            enrich_demography:github] (optional)
@@ -848,7 +852,7 @@ data_source = gitlab-merges
 
 ```
 #### gitter [&uarr;](#supported-data-sources-)
-Messages from gitter rooms 
+Messages from gitter rooms
 - projects.json
 ```
 {
@@ -1454,4 +1458,4 @@ cd .../grimoirelab-sirmordred/utils/
 micro.py --raw --enrich --cfg ./setup.cfg --backends git # execute the Raw and Enrich tasks for the Git cfg section
 micro.py --panels # execute the Panels task to load the Sigils panels to Kibiter
 micro.py --raw --enrich --debug --cfg ./setup.cfg --backends groupsio --logs-dir logs # execute the raw and enriched tasks for the groupsio cfg section with debug mode on and logs being saved in the folder logs in the same directory as micro.py
-``` 
+```
